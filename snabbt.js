@@ -1,5 +1,4 @@
-/* snabbt.js Version: 0.6.4 Build date: 2015-12-27 (c) 2015 Daniel Lundin @license MIT */
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.snabbt = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.snabbt = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 // Array.prototype.find - MIT License (c) 2013 Paul Miller <http://paulmillr.com>
 // For all details and docs: https://github.com/paulmillr/array.prototype.find
 // Fixes and tests supplied by Duncan Hall <http://duncanhall.net> 
@@ -446,7 +445,7 @@ var Engine = {
       var completeCallback = animation[1].options.complete;
       if (completeCallback) completeCallback();
     });
-    this.clearOphanedEndStates();
+    //this.clearOphanedEndStates();
   },
 
   createQueuedAnimations: function createQueuedAnimations(finished) {
@@ -499,13 +498,27 @@ var Engine = {
   },
 
   stopAnimation: function stopAnimation(element) {
-    var stoppedAnimation = this.runningAnimations.filter(function (animation) {
-      return animation[0] === element;
+    var stoppedAnimation = [];
+    var runningAnimations = [];
+    for (var i = 0, len = this.runningAnimations.length; i < len; i++) {
+      var animation = this.runningAnimations[i];
+      if (animation[0] === element) {
+        stoppedAnimation.push(animation);
+      } else {
+        runningAnimations.push(animation);
+      }
+    }
+    this.runningAnimations = runningAnimations;
+    Array.prototype.push.apply(this.completedAnimations, stoppedAnimation);
+  },
+
+  removeAnimation: function removeAnimation(element) {
+    this.completedAnimations = this.completedAnimations.filter(function (animation) {
+      return animation[0] !== element;
     });
     this.runningAnimations = this.runningAnimations.filter(function (animation) {
       return animation[0] !== element;
     });
-    Array.prototype.push.apply(this.completedAnimations, stoppedAnimation);
   },
 
   initializeAnimation: function initializeAnimation(element, arg2, arg3) {
@@ -514,6 +527,8 @@ var Engine = {
       animation = this.createAttentionAnimation(element, arg3);
     } else if (arg2 === 'stop') {
       return this.stopAnimation(element);
+    }if (arg2 === 'remove') {
+      return this.removeAnimation(element);
     } else {
       animation = this.createAnimation(element, arg2);
     }

@@ -81,7 +81,7 @@ const Engine = {
       if (completeCallback)
         completeCallback();
     });
-    this.clearOphanedEndStates();
+    //this.clearOphanedEndStates();
   },
 
   createQueuedAnimations(finished) {
@@ -132,9 +132,27 @@ const Engine = {
   },
 
   stopAnimation(element) {
-    const stoppedAnimation = this.runningAnimations.filter((animation) => animation[0] === element);
-    this.runningAnimations = this.runningAnimations.filter((animation) => animation[0] !== element);
+    const stoppedAnimation = [];
+    const runningAnimations = [];
+    for (let i = 0, len = this.runningAnimations.length; i < len; i++) {
+      let animation = this.runningAnimations[i];
+      if (animation[0] === element) {
+        stoppedAnimation.push(animation);
+      } else {
+        runningAnimations.push(animation);
+      }
+    }
+    this.runningAnimations = runningAnimations;
     Array.prototype.push.apply(this.completedAnimations, stoppedAnimation);
+  },
+
+  removeAnimation(element) {
+    this.completedAnimations = this.completedAnimations.filter(function (animation) {
+      return animation[0] !== element;
+    });
+    this.runningAnimations = this.runningAnimations.filter(function (animation) {
+      return animation[0] !== element;
+    });
   },
 
   initializeAnimation(element, arg2, arg3) {
@@ -143,6 +161,8 @@ const Engine = {
       animation = this.createAttentionAnimation(element, arg3);
     } else if (arg2 === 'stop') {
       return this.stopAnimation(element);
+    } if (arg2 === 'remove') {
+      return this.removeAnimation(element);
     } else {
       animation = this.createAnimation(element, arg2);
     }
