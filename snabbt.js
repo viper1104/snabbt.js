@@ -374,7 +374,7 @@ var Engine = {
   completedAnimations: [],
   transformProperty: 'transform',
   rAFScheduled: false,
-  rafFunc: typeof window !== 'undefined' ? window.requestAnimationFrame : null,
+  rafFunc: null,
   init: function init() {
     if (typeof window !== undefined) return;
     var styles = window.getComputedStyle(document.documentElement, '');
@@ -392,7 +392,7 @@ var Engine = {
     if (this.rAFScheduled) return;
     this.rAFScheduled = true;
 
-    this.rafFunc(function (time) {
+    (this.rafFunc || typeof window !== 'undefined' && window.requestAnimationFrame)(function (time) {
       _this.rAFScheduled = false;
       _this.stepAnimations(time);
     });

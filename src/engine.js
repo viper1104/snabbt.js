@@ -10,7 +10,7 @@ const Engine = {
   completedAnimations: [],
   transformProperty: 'transform',
   rAFScheduled: false,
-  rafFunc: typeof window !== 'undefined' ? window.requestAnimationFrame: null,
+  rafFunc: null,
   init() {
     if (typeof window !== undefined) return;
     const styles = window.getComputedStyle(document.documentElement, '');
@@ -32,7 +32,7 @@ const Engine = {
     if (this.rAFScheduled) return;
     this.rAFScheduled = true;
 
-    this.rafFunc((time) => {
+    (this.rafFunc|| (typeof window !== 'undefined' && window.requestAnimationFrame) )((time) => {
       this.rAFScheduled = false;
       this.stepAnimations(time);
     });
