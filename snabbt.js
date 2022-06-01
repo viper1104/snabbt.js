@@ -374,11 +374,16 @@ var Engine = {
   completedAnimations: [],
   transformProperty: 'transform',
   rAFScheduled: false,
+  rafFunc: typeof window !== 'undefined' ? window.requestAnimationFrame : null,
   init: function init() {
     if (typeof window !== undefined) return;
     var styles = window.getComputedStyle(document.documentElement, '');
     var vendorPrefix = (Array.prototype.slice.call(styles).join('').match(/-(moz|webkit|ms)-/) || styles.OLink === '' && ['', 'o'])[1];
     if (vendorPrefix === 'webkit') this.transformProperty = 'webkitTransform';
+  },
+
+  changeRequestAnimationFrameFunction: function changeRequestAnimationFrameFunction(func) {
+    this.rafFunc = func;
   },
 
   scheduleNextFrame: function scheduleNextFrame() {
@@ -387,7 +392,7 @@ var Engine = {
     if (this.rAFScheduled) return;
     this.rAFScheduled = true;
 
-    window.requestAnimationFrame(function (time) {
+    this.rafFunc(function (time) {
       _this.rAFScheduled = false;
       _this.stepAnimations(time);
     });
@@ -650,12 +655,15 @@ module.exports.sequence = function (queue) {
   next();
 };
 
-if (typeof window !== 'undefined' && window.jQuery) {
-  (function ($) {
-    $.fn.snabbt = function (arg1, arg2) {
-      return snabbt(this.get(), arg1, arg2);
-    };
-  })(window.jQuery);
+if (typeof window !== 'undefined') {
+  window.snabbt = Engine;
+  if (window.jQuery) {
+    (function ($) {
+      $.fn.snabbt = function (arg1, arg2) {
+        return snabbt(this.get(), arg1, arg2);
+      };
+    })(window.jQuery);
+  }
 }
 
 Engine.init();

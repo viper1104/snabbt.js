@@ -86,12 +86,15 @@ module.exports.sequence = (queue) => {
   next();
 };
 
-if (typeof window !== 'undefined' && window.jQuery) {
-  (function ($) {
-    $.fn.snabbt = function(arg1, arg2) {
-      return snabbt(this.get(), arg1, arg2);
-    };
-  })(window.jQuery);
+if (typeof window !== 'undefined') {
+  window.snabbt = Engine;
+  if (window.jQuery) {
+    (function ($) {
+      $.fn.snabbt = function(arg1, arg2) {
+        return snabbt(this.get(), arg1, arg2);
+      };
+    })(window.jQuery);
+  }
 }
 
 Engine.init();
